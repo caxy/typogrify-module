@@ -37,7 +37,7 @@ function typogrify_filter_info() {
 function _typogrify_filter_tips($filter, $format, $long) {
   if ($long) {
     $output = t('Typogrify.module brings the typographic refinements of Typogrify to Drupal.<ul>
-<li>Wraps ampersands (the $ldquo;&amp;&rdquo; character) with &lt;span class=\"amp\"&gt;&amp;&lt;/span&gt;.</li>
+<li>Wraps ampersands (the &ldquo;&amp;&rdquo; character) with &lt;span class=\"amp\"&gt;&amp;&lt;/span&gt;.</li>
 <li>Prevents single words from wrapping onto their own line using Shaun Inman\'s Widont technique.</li>
 <li>Converts straight quotation marks to typographer\'s quotation marks, using SmartyPants.</li>
 <li>Converts multiple hyphens to en dashes and em dashes (according to your preferences), using SmartyPants.</li>
@@ -161,7 +161,9 @@ function _typogrify_settings(&$form_state, $filter, $defaults, $format, $filters
   // Smartypants settings.
   $form['smartypants_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use typographers quotation marks and dashes (!smartylink)', array('!smartylink' => l('SmartyPants', 'http://daringfireball.net/projects/smartypants/'))),
+    '#title' => t('Use typographers quotation marks and dashes (!smartylink)', array(
+      '!smartylink' => l('SmartyPants', 'http://daringfireball.net/projects/smartypants/')
+    )),
     '#default_value' => $defaults->settings['smartypants_enabled'],
   );
 
@@ -206,11 +208,14 @@ function _typogrify_settings(&$form_state, $filter, $defaults, $format, $filters
     '#title' => t('Wrap quotation marks'),
     '#default_value' => $defaults->settings['wrap_initial_quotes'],
   );
-  
+
   // Ligature conversion settings.
   $ligature_options = array();
   foreach (unicode_conversion_map('ligature') as $ascii => $unicode) {
-    $ligature_options[$ascii] =  t('Convert !ascii to !unicode', array('!ascii' => $ascii, '!unicode' => $unicode));
+    $ligature_options[$ascii] =  t('Convert <code>@ascii</code> to !unicode', array(
+      '@ascii' => $ascii,
+      '!unicode' => $unicode,
+    ));
   }
 
   $form['ligatures'] = array(
@@ -223,7 +228,11 @@ function _typogrify_settings(&$form_state, $filter, $defaults, $format, $filters
   // Arrow conversion settings.
   $arrow_options = array();
   foreach (unicode_conversion_map('arrow') as $ascii => $unicode) {
-    $arrow_options[$ascii] =  t('Convert @ascii to !unicode', array('@ascii' => $ascii, '!unicode' => $unicode));
+    $arrow_options[$ascii] =  t('Convert <code>@ascii</code> to !unicode', array(
+      '@ascii' => $ascii,
+      '!unicode' => $unicode,
+    ));
+
   }
 
   $form['arrows'] = array(
@@ -235,12 +244,17 @@ function _typogrify_settings(&$form_state, $filter, $defaults, $format, $filters
 
   // Version Information Settings
   $version_strings = array();
-  $version_strings[] = t('SmartyPants PHP version: !version', array('!version' => l(SMARTYPANTS_PHP_VERSION, 'http://www.michelf.com/projects/php-smartypants/')));
-  $version_strings[] = t('PHP Typogrify Version: !version', array('!version' => l('1.0', 'http://blog.hamstu.com/')));
+  $version_strings[] = t('SmartyPants PHP version: !version', array(
+    '!version' => l(SMARTYPANTS_PHP_VERSION, 'http://www.michelf.com/projects/php-smartypants/')
+  ));
+  $version_strings[] = t('PHP Typogrify Version: !version', array(
+    '!version' => l('1.0', 'http://blog.hamstu.com/')
+  ));
 
   $form['info']['typogrify_status'] = array(
-    '#type' => 'markup',
-    '#value' => theme('item_list', $version_strings, t('Version Information'))
+    '#type' => 'item',
+    '#title' => t('Versions'),
+    '#markup' => theme('item_list', array('items' => $version_strings)),
   );
 
   return $form;
