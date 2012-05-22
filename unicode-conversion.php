@@ -31,6 +31,12 @@ function unicode_conversion_map($type = 'all') {
       '---'   => '&mdash;',
       '--'    => '&ndash;',
     ),
+    'quotes' => array(
+      ',,'    => '&bdquo;',
+      '\'\''  => '&rdquo;',
+      '<<'    => '&laquo;',
+      '>>'    => '&raquo;',
+    ),
     // See http:#www.unicode.org/charts/PDF/U2190.pdf
     'arrow' => array(
       '->>' => '&#x21a0;',
@@ -47,7 +53,7 @@ function unicode_conversion_map($type = 'all') {
   );
 
   if ($type == 'all') {
-    return array_merge($map['ligature'], $map['arrow'], $map['punctuation']);
+    return array_merge($map['ligature'], $map['arrow'], $map['punctuation'], $map['quotes']);
   }
   elseif ($type == 'nested') {
     return $map;

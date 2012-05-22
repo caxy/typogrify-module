@@ -514,8 +514,8 @@ function EducateBackticks($_) {
 #   Example output: &#8220;Isn't this fun?&#8221;
 #
 
-	$_ = str_replace(array("``",       "''",),
-					 array('&#8220;', '&#8221;'), $_);
+  $_ = str_replace(array("``",      "''",      ",,"),
+                   array('&#8220;', '&#8221;', '&#8222;'), $_);
 	return $_;
 }
 
@@ -619,10 +619,10 @@ function StupefyEntities($_) {
 					 array('-',       '--'), $_);
 
 	# single quote         open       close
-	$_ = str_replace(array('&#8216;', '&#8217;'), "'", $_);
+	$_ = str_replace(array('&#8216;', '&#8217;', '&#8218;'), "'", $_);
 
 	# double quote         open       close
-	$_ = str_replace(array('&#8220;', '&#8221;'), '"', $_);
+	$_ = str_replace(array('&#8220;', '&#8221;', '&#8222;'), '"', $_);
 
 	$_ = str_replace('&#8230;', '...', $_); # ellipsis
 
@@ -645,10 +645,11 @@ function ProcessEscapes($_) {
 #               \.      &#46;
 #               \-      &#45;
 #               \`      &#96;
+#               \,      &#x2c;
 #
 	$_ = str_replace(
-		array('\\\\',  '\"',    "\'",    '\.',    '\-',    '\`'),
-		array('&#92;', '&#34;', '&#39;', '&#46;', '&#45;', '&#96;'), $_);
+		array('\\\\',  '\"',    "\'",    '\.',    '\-',    '\`',    '\,',     '&lt;', '&gt;',),
+		array('&#92;', '&#34;', '&#8217;', '&#46;', '&#45;', '&#96;', '&#x2c;', '<',    '>',), $_);
 
 	return $_;
 }
