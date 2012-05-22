@@ -71,6 +71,14 @@ function typogrify_init() {
  */
 function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   $characters_to_convert = array();
+  $ctx = array();
+  if ($langcode == 'und') {
+    global $language;
+    $ctx['langcode'] = $language->language;
+   }
+  else {
+    $ctx['langcode'] = $langcode;
+  }
   // Load Helpers.
   module_load_include('class.php', 'typogrify');
   module_load_include('php', 'typogrify', 'unicode-conversion');
@@ -90,7 +98,7 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
   if ($filter->settings['smartypants_enabled']) {
     global $_typogrify_smartypants_attr;
     $_typogrify_smartypants_attr = $filter->settings['smartypants_hyphens'];
-    $text = SmartyPants($text);
+    $text = SmartyPants($text, NULL, $ctx);
   }
 
   // Wrap caps.

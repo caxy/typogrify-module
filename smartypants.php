@@ -11,6 +11,7 @@
  *
  * Copyright (c) 2003-2004 John Gruber
  * Copyright (c) 2004-2005 Michel Fortin
+ * Copyright (c) 2012 Micha Glave - i18n-quote-style
  *
  * Re-released under GPLv2 for Drupal.
  */
@@ -23,7 +24,7 @@ define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|math)[\s>]@');
 // A global variable to keep track of our current SmartyPants 
 // configuration setting.
 global $_typogrify_smartypants_attr;
-$_typogrify_smartypants_attr = "1";  # Change this to configure.
+$_typogrify_smartypants_attr = "1Q";  # Change this to configure.
 						  #  1 =>  "--" for em-dashes; no en-dash support
 						  #  2 =>  "---" for em-dashes; "--" for en-dashes
 						  #  3 =>  "--" for em-dashes; "---" for en-dashes
@@ -35,6 +36,22 @@ function smarty_modifier_smartypants($text, $attr = NULL) {
 	return SmartyPants($text, $attr);
 }
 
+function typogrify_i18n_quotes($langcode = NULL) {
+  $quotes = array(
+    'de' => array( 'do' => '&#8222;', 'dc' => '&#8220;', 'so' => '&#8218;', 'sc' => '&#8216;',),
+    'en' => array( 'do' => '&#8220;', 'dc' => '&#8221;', 'so' => '&#8216;', 'sc' => '&#8217;',),
+    'fr' => array( 'do' => '&laquo;', 'dc' => '&raquo',  'so' => '&lsaquo;','sc' => '&rsaquo;'),
+    'nl' => array( 'do' => '&#8222;', 'dc' => '&#8220;', 'so' => '&#8216;', 'sc' => '&#8217;',),
+    'ru' => array( 'do' => '&laquo;', 'dc' => '&raquo;', 'so' => '&#8222;', 'sc' => '&#8220;',),
+  );
+  if ($langcode == 'all') {
+    return $quotes;
+  }
+  if (isset($quotes[$langcode])) {
+    return $quotes[$langcode];
+  }
+  return $quotes['en'];
+}
 
 
 function SmartyPants($text, $attr = NULL, $ctx = NULL) {
@@ -56,8 +73,8 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 	# 3 : set all, using inverted old school en and em- dash shortcuts
 	# 
 	# q : quotes
-	# b : backtick quotes (``double'' only)
-	# B : backtick quotes (``double'' and `single')
+	# b : backtick quotes (``double'' and ,,double`` only)
+	# B : backtick quotes (``double'', ,,double``, ,single` and `single')
 	# d : dashes
 	# D : old school dashes
 	# i : inverted old school dashes
@@ -70,21 +87,21 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 	}
 	else if ($attr == "1") {
 		# Do everything, turn all options on.
-		$do_quotes    = 1;
+		$do_quotes    = 2;
 		$do_backticks = 1;
 		$do_dashes    = 1;
 		$do_ellipses  = 1;
 	}
 	else if ($attr == "2") {
 		# Do everything, turn all options on, use old school dash shorthand.
-		$do_quotes    = 1;
+		$do_quotes    = 2;
 		$do_backticks = 1;
 		$do_dashes    = 2;
 		$do_ellipses  = 1;
 	}
 	else if ($attr == "3") {
 		# Do everything, turn all options on, use inverted old school dash shorthand.
-		$do_quotes    = 1;
+		$do_quotes    = 2;
 		$do_backticks = 1;
 		$do_dashes    = 3;
 		$do_ellipses  = 1;
@@ -97,6 +114,7 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 		$chars = preg_split('//', $attr);
 		foreach ($chars as $c){
 			if      ($c == "q") { $do_quotes    = 1; }
+		 	else if ($c == "Q") { $do_quotes    = 2; }
 			else if ($c == "b") { $do_backticks = 1; }
 			else if ($c == "B") { $do_backticks = 2; }
 			else if ($c == "d") { $do_dashes    = 1; }
@@ -109,6 +127,12 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 			}
 		}
 	}
+  if ($do_quotes == 2) {
+    $doc_lang = $ctx['langcode'];
+  }
+  else {
+    $doc_lang = 'en';
+  }
 
 	$tokens = _TokenizeHTML($text);
 	$result = '';
@@ -127,11 +151,21 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 			$result .= $cur_token[1];
 			if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
 				$in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
-			}
+      } else {
+        // reading language from span
+        if (preg_match('/<span .*(xml:)?lang="(..)"/', $cur_token[1], $matches)) {
+          $span_lang = $matches[2];
+        }
+        else if ($cur_token[1] == '</span>') {
+          unset($span_lang);
+        }
+      }
 		} else {
 			$t = $cur_token[1];
 			$last_char = substr($t, -1); # Remember last char of this token before processing.
 			if (! $in_pre) {
+        $quotes = typogrify_i18n_quotes(isset($span_lang) ? $span_lang : $doc_lang);
+
 				$t = ProcessEscapes($t);
 
 				if ($convert_quot) {
@@ -151,32 +185,31 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
 					$t = EducateBackticks($t);
 					if ($do_backticks == 2) $t = EducateSingleBackticks($t);
 				}
-
 				if ($do_quotes) {
+          $t = EducateBackticks($t);
 					if ($t == "'") {
 						# Special case: single-character ' token
 						if (preg_match('/\S/', $prev_token_last_char)) {
-							$t = "&#8217;";
+              $t = $quote['sc'];
 						}
 						else {
-							$t = "&#8216;";
+              $t = $quote['so'];
 						}
 					}
 					else if ($t == '"') {
 						# Special case: single-character " token
 						if (preg_match('/\S/', $prev_token_last_char)) {
-							$t = "&#8221;";
+              $t = $quote['dc'];
 						}
 						else {
-							$t = "&#8220;";
+							$t = $quote['do'];
 						}
 					}
 					else {
 						# Normal case:
-						$t = EducateQuotes($t);
+						$t = EducateQuotes($t, $quotes);
 					}
 				}
-
 				if ($do_stupefy) $t = StupefyEntities($t);
 			}
 			$prev_token_last_char = $last_char;
@@ -368,14 +401,14 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
 }
 
 
-function EducateQuotes($_) {
+function EducateQuotes($_, $quotes) {
 #
 #   Parameter:  String.
 #
 #   Returns:    The string, with "educated" curly quote HTML entities.
 #
 #   Example input:  "Isn't this fun?"
-#   Example output: &#8220;Isn&#8217;t this fun?&#8221;
+#   Example output: ['do']Isn&#8217;t this fun?['dc'];
 #
 	# Make our own "punctuation" character class, because the POSIX-style
 	# [:PUNCT:] is only available in Perl 5.6 or later:
@@ -385,17 +418,31 @@ function EducateQuotes($_) {
 	# followed by punctuation at a non-word-break. Close the quotes by brute force:
 	$_ = preg_replace(
 		array("/^'(?=$punct_class\\B)/", "/^\"(?=$punct_class\\B)/"),
-		array('&#8217;',                 '&#8221;'), $_);
+		array($quotes['sc'],             $quotes['dc']), $_);
 
 
 	# Special case for double sets of quotes, e.g.:
 	#   <p>He said, "'Quoted' words in a larger quote."</p>
+  $spacer = '&#8201;';
 	$_ = preg_replace(
-		array("/\"'(?=\w)/",    "/'\"(?=\w)/"),
-		array('&#8220;&#8216;', '&#8216;&#8220;'), $_);
+    array(
+      "/\"'(?=\w)/",
+      "/'\"(?=\w)/",
+      "/(\w)\"'/",
+      "/(\w)'\"/",
+    ),
+    array(
+      $quotes['do'].$spacer.$quotes['so'],
+      $quotes['so'].$spacer.$quotes['do'],
+      '\1'.$quotes['dc'].$spacer.$quotes['sc'],
+      '\1'.$quotes['sc'].$spacer.$quotes['dc'],
+    ), $_);
 
 	# Special case for decade abbreviations (the '80s):
 	$_ = preg_replace("/'(?=\\d{2}s)/", '&#8217;', $_);
+
+  # Special case for apostroph
+  $_ = preg_replace("/(\\w)(')(?=\\w)/", '\1&#8217;', $_);
 
 	$close_class = '[^\ \t\r\n\[\{\(\-]';
 	$dec_dashes = '&\#8211;|&\#8212;';
@@ -412,7 +459,7 @@ function EducateQuotes($_) {
 		)
 		'                   # the quote
 		(?=\\w)              # followed by a word character
-		}x", '\1&#8216;', $_);
+		}x", '\1'.$quotes['so'], $_);
 	# Single closing quotes:
 	$_ = preg_replace("{
 		($close_class)?
@@ -422,10 +469,10 @@ function EducateQuotes($_) {
 		)               # char or an 's' at a word ending position. This
 						# is a special case to handle something like:
 						# \"<i>Custer</i>'s Last Stand.\"
-		}xi", '\1&#8217;', $_);
+		}xi", '\1'.$quotes['sc'], $_);
 
 	# Any remaining single quotes should be opening ones:
-	$_ = str_replace("'", '&#8216;', $_);
+	$_ = str_replace("'", $quotes['so'], $_);
 
 
 	# Get most opening double quotes:
@@ -440,7 +487,7 @@ function EducateQuotes($_) {
 		)
 		\"                   # the quote
 		(?=\\w)              # followed by a word character
-		}x", '\1&#8220;', $_);
+		}x", '\1'.$quotes['do'], $_);
 
 	# Double closing quotes:
 	$_ = preg_replace("{
@@ -448,10 +495,10 @@ function EducateQuotes($_) {
 		\"
 		(?(1)|(?=\\s))   # If $1 captured, then do nothing;
 						   # if not, then make sure the next char is whitespace.
-		}x", '\1&#8221;', $_);
+		}x", '\1'.$quotes['dc'], $_);
 
 	# Any remaining quotes should be opening ones.
-	$_ = str_replace('"', '&#8220;', $_);
+	$_ = str_replace('"', $quotes['do'], $_);
 
 	return $_;
 }
