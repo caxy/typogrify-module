@@ -1,13 +1,13 @@
-<?php // $Id$
+<?php
 
 /**
- * @file typogrify.class.test
+ * @file
  * Unit tests for the basic typogrify functionality.
  */
 
 class TypogrifySmartyPantsTestCase extends DrupalWebTestCase {
   /**
-   * Implementation of getInfo().
+   * Implements getInfo().
    */
   function getInfo() {
     return array(
@@ -18,7 +18,7 @@ class TypogrifySmartyPantsTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Implementation of setUp().
+   * Implement setUp().
    */
   function setUp() {
     parent::setUp('typogrify');
@@ -27,6 +27,9 @@ class TypogrifySmartyPantsTestCase extends DrupalWebTestCase {
     module_load_include('php', 'typogrify', 'smartypants');
   }
 
+  /**
+   * Original example compatibility-test.
+   */
   function testOriginalTypogrifyExample() {
     $before = <<<HTML
 <h2>"Jayhawks" & KU fans act extremely obnoxiously</h2>
@@ -38,8 +41,6 @@ HTML;
 HTML;
 
     $result = _typogrify_process($before, 'test');
-    $this->assertEqual($result, $after,
-      t('Original Typogrify example.'));
+    $this->assertEqual($result, $after, t('Original Typogrify example.'));
   }
 }
-
