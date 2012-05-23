@@ -115,9 +115,7 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
 
   // Smartypants formatting.
   if ($filter->settings['smartypants_enabled']) {
-    global $_typogrify_smartypants_attr;
-    $_typogrify_smartypants_attr = $filter->settings['smartypants_hyphens'];
-    $text = SmartyPants($text, NULL, $ctx);
+    $text = SmartyPants($text, $filter->settings['smartypants_hyphens'], $ctx);
   }
 
   // Wrap caps.

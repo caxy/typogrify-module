@@ -31,7 +31,7 @@ define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|math)[\s>]@');
 // 2 =>  "---" for em-dashes; "--" for en-dashes
 // 3 =>  "--" for em-dashes; "---" for en-dashes
 // See docs for more configuration options.
-$_typogrify_smartypants_attr = "1Q";
+$_typogrify_smartypants_attr = "1";
 
 /* -- Smarty Modifier Interface ------------------------------------------*/
 
