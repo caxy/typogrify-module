@@ -105,7 +105,7 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
 
   // Wrap ampersands.
   if ($filter->settings['wrap_ampersand']) {
-    $text = Typogrify::amp($text);
+    $text = SmartAmpersand($text);
   }
 
   // Remove widows.

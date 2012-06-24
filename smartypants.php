@@ -491,6 +491,32 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
   return $result;
 }
 
+function SmartAmpersand($text) {
+  $tokens;
+  $tokens = _TokenizeHTML($text);
+
+  $result = '';
+  // Keep track of when we're inside <pre> or <code> tags.
+  $in_pre = 0;
+  foreach ($tokens as $cur_token) {
+    if ($cur_token[0] == "tag") {
+      // Don't mess with quotes inside tags.
+      $result .= $cur_token[1];
+      if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
+        $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      }
+    }
+    else {
+      $t = $cur_token[1];
+      if (!$in_pre) {
+        $t = Typogrify::amp($t);
+      }
+      $result .= $t;
+    }
+  }
+  return $result;
+}
+
 /**
  * EducatedQuotes.
  * Example input:  "Isn't this fun?"

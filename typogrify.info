@@ -1,6 +1,5 @@
 name = Typogrify
 description = Adds typographic refinements.
 package = "Input filters"
-project = "typogrify"
 core = 7.x
 files[] = typogrify.class.php
