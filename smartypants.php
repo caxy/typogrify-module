@@ -491,6 +491,62 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
   return $result;
 }
 
+function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
+  $tokens;
+  $tokens = _TokenizeHTML($text);
+
+  $replace_method = '_typogrify_abbr_asis';
+  if ($attr == 1) {
+    $replace_method = '_typogrify_abbr_narrownbsp';
+  } elseif ($attr == 2) {
+    $replace_method = '_typogrify_abbr_thinsp';
+  } elseif ($attr == 3) {
+    $replace_method = '_typogrify_abbr_span';
+  }
+  $result = '';
+  // Keep track of when we're inside <pre> or <code> tags.
+  $in_pre = 0;
+  foreach ($tokens as $cur_token) {
+    if ($cur_token[0] == "tag") {
+      // Don't mess with quotes inside tags.
+      $result .= $cur_token[1];
+      if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
+        $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      }
+    }
+    else {
+      $t = $cur_token[1];
+      if (!$in_pre) {
+        $abbr_finder = '/(?<=\s|)([a-zA-ZäöüÄÖÜ]+\.)([a-zA-ZäöüÄÖÜ]+\.)+(?=\s|)/';
+        $t = preg_replace_callback($abbr_finder, $replace_method, $t);
+      }
+      $result .= $t;
+    }
+  }
+  return $result;
+}
+
+function _typogrify_abbr_asis($hit) {
+  return '<span class="abbr">' . $hit[0] . '</span>';
+}
+
+function _typogrify_abbr_thinsp($hit) {
+  $res = preg_replace('/\.(\w)/', '.&#8201;\1', $hit[0]);
+  return '<span class="abbr">' . $res . '</span>';
+}
+
+function _typogrify_abbr_narrownbsp($hit) {
+  $res = preg_replace('/\.(\w)/', '.&#8239;\1', $hit[0]);
+  return '<span class="abbr">' . $res . '</span>';
+}
+
+function _typogrify_abbr_span($hit) {
+  $thbl = '.<span style="margin-left:0.167em"><span style="display:none">&nbsp;</span></span>';
+  $res = preg_replace('/\.(\w)/', $thbl . '\1', $hit[0]);
+  return '<span class="abbr">' . $res . '</span>';
+}
+
+
 function SmartAmpersand($text) {
   $tokens;
   $tokens = _TokenizeHTML($text);

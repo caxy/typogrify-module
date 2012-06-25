@@ -118,6 +118,11 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
     $text = SmartyPants($text, $filter->settings['smartypants_hyphens'], $ctx);
   }
 
+  // Wrap abbreviations.
+  if (isset($filter->settings['thin_space']) && $filter->settings['thin_space'] > 0) {
+    $text = typogrify_smart_abbreviation($text, $filter->settings['thin_space']);
+  }
+
   // Wrap caps.
   if ($filter->settings['wrap_caps']) {
     $text = Typogrify::caps($text);
@@ -241,6 +246,20 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     '#type' => 'checkbox',
     '#title' => t('Wrap caps'),
     '#default_value' => $filter->settings['wrap_caps'],
+  );
+
+  $form['thin_space'] = array(
+    '#type' => 'select',
+    '#title' => t('Thin space in abbreviations:'),
+    '#description' => t('Wraps abbreviations with &lt;span class="abbr"&gt;&lt;/span&gt; and inserts space after the dots.'),
+    '#default_value' => $filter->settings['thin_space'],
+    '#options' => array(
+      0 => t('Do nothing'),
+      4 => t('Insert no space'),
+      1 => t('“U+202F“ Narrow no-break space'),
+      2 => t('“U+2009“ Thin space'),
+      3 => t('span with margin-left: 0.167em'),
+    ),
   );
 
   // Wrap initial quotes settings.
