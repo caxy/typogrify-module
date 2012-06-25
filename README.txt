@@ -18,6 +18,8 @@ Typogrify.module brings the typographic refinements of Typogrify to Drupal.
 
 * Wraps multiple capital letters with <span class="caps">CAPS</span>.
 
+* Wraps abbreviations with <span class="abbr">t.l.a.</span>.
+
 * Wraps initial quotation marks with <span class="quo"></span> or
   <span class="dquo"></span>.
 

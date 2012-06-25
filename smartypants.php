@@ -531,18 +531,18 @@ function _typogrify_abbr_asis($hit) {
 }
 
 function _typogrify_abbr_thinsp($hit) {
-  $res = preg_replace('/\.(\w)/', '.&#8201;\1', $hit[0]);
+  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', '.&#8201;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
 function _typogrify_abbr_narrownbsp($hit) {
-  $res = preg_replace('/\.(\w)/', '.&#8239;\1', $hit[0]);
+  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', '.&#8239;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
 function _typogrify_abbr_span($hit) {
   $thbl = '.<span style="margin-left:0.167em"><span style="display:none">&nbsp;</span></span>';
-  $res = preg_replace('/\.(\w)/', $thbl . '\1', $hit[0]);
+  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', $thbl . '\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
