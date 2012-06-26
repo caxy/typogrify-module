@@ -442,7 +442,7 @@ function SmartDashes($text, $attr = NULL, $ctx = NULL) {
 }
 
 /**
- * SmartEliipses.
+ * SmartEllipses.
  *
  * @param string $text
  *   Text to be parsed.
@@ -489,6 +489,64 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
     }
   }
   return $result;
+}
+
+function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
+  $tokens;
+  $tokens = _TokenizeHTML($text);
+
+  if ($attr == 0) {
+    return $text;
+  } elseif ($attr == 1) {
+    $method = '_typogrify_number_narrownbsp';
+  } elseif ($attr == 2) {
+    $method = '_typogrify_number_thinsp';
+  } elseif ($attr == 3) {
+    $method = '_typogrify_number_span';
+  }
+
+  $result = '';
+  // Keep track of when we're inside <pre> or <code> tags.
+  $in_pre = 0;
+  foreach ($tokens as $cur_token) {
+    if ($cur_token[0] == "tag") {
+      // Don't mess with quotes inside tags.
+      $result .= $cur_token[1];
+      if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
+        $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      }
+    }
+    else {
+      $t = $cur_token[1];
+      if (!$in_pre) {
+        $number_finder = '/(?<!&#)(\d{3}\d+)([.,]\d+|)/';
+        $t = preg_replace_callback($number_finder, $method , $t);
+      }
+      $result .= $t;
+    }
+  }
+  return $result;
+}
+
+function _typogrify_number_narrownbsp($hit) {
+  $thbl = '&#8239;';
+  $dec = preg_replace('/\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[1]);
+  $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[2]);
+  return '<span class="number">' . $dec .$frac . '</span>';
+}
+
+function _typogrify_number_thinsp($hit) {
+  $thbl = '&#8201;';
+  $dec = preg_replace('/\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[1]);
+  $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[2]);
+  return '<span class="number">' . $dec .$frac . '</span>';
+}
+
+function _typogrify_number_span($hit) {
+  $thbl = '<span style="margin-left:0.167em"></span>';
+  $dec = preg_replace('/\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[1]);
+  $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[2]);
+  return '<span class="number">' . $dec .$frac . '</span>';
 }
 
 function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {

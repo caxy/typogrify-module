@@ -24,9 +24,10 @@ function typogrify_filter_info() {
         'smartypants_hyphens' => 3,
         'wrap_ampersand' => 1,
         'widont_enabled' => 1,
-        'wrap_abbr' => 3,
+        'wrap_abbr' => 0,
         'wrap_caps' => 1,
         'wrap_initial_quotes' => 1,
+        'wrap_numbers' => 0,
         'long_s' => 0,
         'ligatures' => array(),
         'arrows' => array(),
@@ -137,8 +138,13 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
   }
 
   // Wrap abbreviations.
-  if (isset($filter->settings['wrap_abbr']) && $filter->settings['wrap_abbr'] > 0) {
+  if ($filter->settings['wrap_abbr'] > 0) {
     $text = typogrify_smart_abbreviation($text, $filter->settings['wrap_abbr']);
+  }
+
+  // Wrap huge numbers.
+  if ($filter->settings['wrap_numbers'] > 0) {
+    $text = typogrify_smart_numbers($text, $filter->settings['wrap_numbers']);
   }
 
   // Wrap caps.
@@ -208,8 +214,10 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     'smartypants_hyphens' => 2,
     'wrap_ampersand' => 1,
     'widont_enabled' => 1,
+    'wrap_abbr' => 0,
     'wrap_caps' => 1,
     'wrap_initial_quotes' => 1,
+    'wrap_numbers' => 0,
     'ligatures' => array(),
     'arrows' => array(),
     'quotes' => array(),
@@ -274,6 +282,19 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     '#options' => array(
       0 => t('Do nothing'),
       4 => t('Insert no space'),
+      1 => t('“U+202F“ Narrow no-break space'),
+      2 => t('“U+2009“ Thin space'),
+      3 => t('span with margin-left: 0.167em'),
+    ),
+  );
+
+  $form['wrap_numbers'] = array(
+    '#type' => 'select',
+    '#title' => t('Digit grouping in numbers'),
+    '#description' => t('Wraps numbers with !span and inserts space for digit grouping.', array('!span' => '<code>&lt;span class="number"&gt;…&lt;/span&gt;</code>')),
+    '#default_value' => $filter->settings['wrap_numbers'],
+    '#options' => array(
+      0 => t('Do nothing'),
       1 => t('“U+202F“ Narrow no-break space'),
       2 => t('“U+2009“ Thin space'),
       3 => t('span with margin-left: 0.167em'),
