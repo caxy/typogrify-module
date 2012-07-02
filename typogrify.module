@@ -135,11 +135,6 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
     $text = SmartAmpersand($text);
   }
 
-  // Remove widows.
-  if ($filter->settings['widont_enabled']) {
-    $text = Typogrify::widont($text);
-  }
-
   // Smartypants formatting.
   if ($filter->settings['smartypants_enabled']) {
     $text = SmartyPants($text, $filter->settings['smartypants_hyphens'], $ctx);
@@ -168,6 +163,11 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
   // Wrap initial quotes.
   if ($filter->settings['hyphenate_shy']) {
     $text = typogrify_hyphenate($text);
+  }
+
+  // Remove widows.
+  if ($filter->settings['widont_enabled']) {
+    $text = Typogrify::widont($text);
   }
 
   // Build a list of ligatures to convert.
