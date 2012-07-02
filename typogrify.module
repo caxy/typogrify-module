@@ -45,28 +45,32 @@ function _typogrify_filter_tips($filter, $format, $long) {
   if ($long) {
     module_load_include('php', 'typogrify', 'unicode-conversion');
 
-    $output = t('Typogrify.module brings the typographic refinements of Typogrify to Drupal.<ul>');
+    $output = t('Typogrify.module brings the typographic refinements of Typogrify to Drupal.');
+    $output .= '<ul>';
     if ($filter->settings['wrap_ampersand']) {
-      $output .= t('<li>Wraps ampersands (the “&amp;” character) with !span.</li>', array('!span' => '<code>&lt;span class="amp"&gt;&amp;&lt;/span&gt;</code>'));
+      $output .= '<li>' . t('Wraps ampersands (the “&amp;” character) with !span.', array('!span' => '<code>&lt;span class="amp"&gt;&amp;&lt;/span&gt;</code>')) . '</li>';
     }
     if ($filter->settings['widont_enabled']) {
-      $output .= t("<li>Prevents single words from wrapping onto their own line using Shaun Inman's Widont technique.</li>");
+      $output .= '<li>' . t("Prevents single words from wrapping onto their own line using Shaun Inman's Widont technique.") . '</li>';
     }
     if ($filter->settings['wrap_initial_quotes']) {
-      $output .= t("<li>Converts straight quotation marks to typographer's quotation marks, using SmartyPants.</li>");
-      $output .= t('<li>Wraps initial quotation marks with !quote or !dquote.</li>', array(
+      $output .= '<li>' . t("Converts straight quotation marks to typographer's quotation marks, using SmartyPants.");
+      $output .= '</li><li>' . t('Wraps initial quotation marks with !quote or !dquote.', array(
         '!quote' => '<code>&lt;span class="quo"&gt;&lt;/span&gt;</code>',
         '!dquote' => '<code>&lt;span class="dquo"&gt;&lt;/span&gt;</code>')
-      );
+      ) . '</li>';
     }
     $output .= t('<li>Converts multiple hyphens to en dashes and em dashes (according to your preferences), using SmartyPants.</li>');
     if ($filter->settings['wrap_abbr']) {
-      $output .= t('<li>Wraps abbreviations as “e.g.” to !span and adds a thin space (1/6 em) after the dots.</li>', array('!span' => '<code>&lt;span class="abbr"&gt;e.g.&lt;/span&gt;</code>'));
+      $output .= '<li>' . t('Wraps abbreviations as “e.g.” to !span and adds a thin space (1/6 em) after the dots.</li>', array('!span' => '<code>&lt;span class="abbr"&gt;e.g.&lt;/span&gt;</code>')) . '</li>';
+    }
+    if ($filter->settings['wrap_numbers']) {
+      $output .= '<li>' . t('Wraps large numbers &gt; 1&thinsp;000 with !span and inserts thin space for digit grouping.', array('!span' => '<code>&lt;span class="number"&gt;…&lt;/span&gt;</code>')) . '</li>';
     }
     if ($filter->settings['wrap_caps']) {
-      $output .= t('<li>Wraps multiple capital letters with !span.</li>', array('!span' => '<code>&lt;span class="caps"&gt;CAPS&lt;/span&gt;</code>'));
+      $output .= '<li>' . t('Wraps multiple capital letters with !span.', array('!span' => '<code>&lt;span class="caps"&gt;CAPS&lt;/span&gt;</code>')) . '</li>';
     }
-    $output .= t('<li>Adds a css style sheet that uses the &lt;span&gt; tags to substitute a showy ampersand in headlines, switch caps to small caps, and hang initial quotation marks.</li>');
+    $output .= '<li>' . t('Adds a css style sheet that uses the &lt;span&gt; tags to substitute a showy ampersand in headlines, switch caps to small caps, and hang initial quotation marks.') . '</li>';
     // Build a list of quotation marks to convert.
     foreach (unicode_conversion_map('quotes') as $ascii => $unicode) {
       if ($filter->settings['quotes'][$ascii]) {
@@ -291,7 +295,7 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
   $form['wrap_numbers'] = array(
     '#type' => 'select',
     '#title' => t('Digit grouping in numbers'),
-    '#description' => t('Wraps numbers with !span and inserts space for digit grouping.', array('!span' => '<code>&lt;span class="number"&gt;…&lt;/span&gt;</code>')),
+    '#description' => t('Wraps numbers with !span and inserts thin space for digit grouping.', array('!span' => '<code>&lt;span class="number"&gt;…&lt;/span&gt;</code>')),
     '#default_value' => $filter->settings['wrap_numbers'],
     '#options' => array(
       0 => t('Do nothing'),
