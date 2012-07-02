@@ -23,6 +23,9 @@ define('SMARTYPANTS_SYNTAX_VERSION', '1.5.1');
 // Regex-pattern for tags we don't mess with.
 define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|textarea|tt|math)[\s>]@');
 
+// Alphabeth + C0h - FFh.
+define('I18N_LETTER', '[A-Za-zÀ-ÿ]');
+
 // A global variable to keep track of our current SmartyPants
 // configuration setting.
 //
@@ -491,10 +494,17 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
   return $result;
 }
 
-function typogrify_hyphenate($text, $attr = 0, $ctx = NULL) {
+/**
+ * Replaces = with '&shy;' for easier manual hyphenating.
+ *
+ * @param string $text
+ *   work on.
+ */
+function typogrify_hyphenate($text) {
   $tokens;
   $tokens = _TokenizeHTML($text);
 
+  $number_finder = "/(" . I18N_LETTER . ')=(' . I18N_LETTER . ')/';
   $result = '';
   // Keep track of when we're inside <pre> or <code> tags.
   $in_pre = 0;
@@ -509,8 +519,7 @@ function typogrify_hyphenate($text, $attr = 0, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $number_finder = '/(\w)=(\w)/';
-        $t = preg_replace($number_finder, '\1&shy;\2' , $t);
+        $t = preg_replace($number_finder, '\1&shy;\2', $t);
       }
       $result .= $t;
     }
@@ -518,17 +527,30 @@ function typogrify_hyphenate($text, $attr = 0, $ctx = NULL) {
   return $result;
 }
 
+/**
+ * Adding space in numbers for easier reading aka digit grouping.
+ *
+ * @param string $text
+ *   to work on.
+ * @param int   $attr
+ *   kind of space to use.
+ * @param array $ctx
+ *   not used.
+ */
 function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
   $tokens;
   $tokens = _TokenizeHTML($text);
 
   if ($attr == 0) {
     return $text;
-  } elseif ($attr == 1) {
+  }
+  elseif ($attr == 1) {
     $method = '_typogrify_number_narrownbsp';
-  } elseif ($attr == 2) {
+  }
+  elseif ($attr == 2) {
     $method = '_typogrify_number_thinsp';
-  } elseif ($attr == 3) {
+  }
+  elseif ($attr == 3) {
     $method = '_typogrify_number_span';
   }
 
@@ -542,9 +564,11 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
       $result .= $cur_token[1];
       if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
         $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
-      } elseif (preg_match('/<span .*class="[^"]*\b(number|phone|ignore)\b[^"]*"/', $cur_token[1], $matches)) {
+      }
+      elseif (preg_match('/<span .*class="[^"]*\b(number|phone|ignore)\b[^"]*"/', $cur_token[1], $matches)) {
           $span_stop = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
-      } elseif ($cur_token[1] == '</span>') {
+      }
+      elseif ($cur_token[1] == '</span>') {
           $span_stop = 0;
       }
     }
@@ -552,7 +576,7 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
       $t = $cur_token[1];
       if (!$in_pre && !$span_stop) {
         $number_finder = '@(?:(&#\d{3,4};)|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
-        $t = preg_replace_callback($number_finder, $method , $t);
+        $t = preg_replace_callback($number_finder, $method, $t);
       }
       $result .= $t;
     }
@@ -560,31 +584,69 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
   return $result;
 }
 
+/**
+ * Internal: wraps and inserts space in numbers.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ * @param string $thbl
+ *   kind of whitespace to add.
+ */
 function _typogrify_number_replacer($hit, $thbl) {
   if ($hit[1] != '') {
-    return $hit[1]; // Html-entity number: don't touch.
-  } elseif ($hit[2] != '') {
+    // Html-entity number: don't touch.
+    return $hit[1];
+  }
+  elseif ($hit[2] != '') {
     // Don't format german phone-numbers.
     return $hit[2];
   }
   $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[3]);
   $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[4]);
-  return '<span class="number">' . $dec .$frac . '</span>';
+  return '<span class="number">' . $dec . $frac . '</span>';
 }
 
+/**
+ * Wrapping numbers and adding whitespace '&narrownbsp;'.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_number_narrownbsp($hit) {
   return _typogrify_number_replacer($hit, '&#8239;');
 }
 
+/**
+ * Wrapping numbers and adding whitespace '&thinsp;'.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_number_thinsp($hit) {
   return _typogrify_number_replacer($hit, '&#8201;');
 }
 
+/**
+ * Wrapping numbers and adding whitespace by setting margin-left in a span.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_number_span($hit) {
   $thbl = '<span style="margin-left:0.167em"></span>';
   return _typogrify_number_replacer($hit, $thbl);
 }
 
+/**
+ * Wrapping abbreviations and adding half space between digit grouping.
+ *
+ * @param string $text
+ *   to work on.
+ * @param int $attr
+ *   kind of space to use.
+ * @param array $ctx
+ *   not used.
+ */
 function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
   $tokens;
   $tokens = _TokenizeHTML($text);
@@ -592,9 +654,11 @@ function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
   $replace_method = '_typogrify_abbr_asis';
   if ($attr == 1) {
     $replace_method = '_typogrify_abbr_narrownbsp';
-  } elseif ($attr == 2) {
+  }
+  elseif ($attr == 2) {
     $replace_method = '_typogrify_abbr_thinsp';
-  } elseif ($attr == 3) {
+  }
+  elseif ($attr == 3) {
     $replace_method = '_typogrify_abbr_span';
   }
   $result = '';
@@ -611,7 +675,8 @@ function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $abbr_finder = '/(?<=\s|)([a-zA-ZäöüÄÖÜ]+\.)([a-zA-ZäöüÄÖÜ]+\.)+(?=\s|)/';
+        $abbr_finder = '/(?<=\s|)(' . I18N_LETTER . '+\.)('
+          . I18N_LETTER . '+\.)+(?=\s|)/';
         $t = preg_replace_callback($abbr_finder, $replace_method, $t);
       }
       $result .= $t;
@@ -620,27 +685,56 @@ function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
   return $result;
 }
 
+/**
+ * Wrapping abbreviations without adding whitespace.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_abbr_asis($hit) {
   return '<span class="abbr">' . $hit[0] . '</span>';
 }
 
+/**
+ * Wrapping abbreviations adding whitespace '&thinsp;'.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_abbr_thinsp($hit) {
-  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', '.&#8201;\1', $hit[0]);
+  $res = preg_replace('/\.(' . I18N_LETTER . ')/', '.&#8201;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
+/**
+ * Wrapping abbreviations adding whitespace '&narrownbsp;'.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_abbr_narrownbsp($hit) {
-  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', '.&#8239;\1', $hit[0]);
+  $res = preg_replace('/\.(' . I18N_LETTER . ')/', '.&#8239;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
+/**
+ * Wrapping abbreviations adding whitespace by setting margin-left in a span.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
 function _typogrify_abbr_span($hit) {
   $thbl = '.<span style="margin-left:0.167em"><span style="display:none">&nbsp;</span></span>';
-  $res = preg_replace('/\.([a-zA-ZäöüÄÖÜ])/', $thbl . '\1', $hit[0]);
+  $res = preg_replace('/\.(' . I18N_LETTER . ')/', $thbl . '\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
-
+/**
+ * Wrapping ampersands.
+ *
+ * @param string $text
+ *   text to work on.
+ */
 function SmartAmpersand($text) {
   $tokens;
   $tokens = _TokenizeHTML($text);
