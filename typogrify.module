@@ -24,6 +24,7 @@ function typogrify_filter_info() {
         'smartypants_hyphens' => 3,
         'wrap_ampersand' => 1,
         'widont_enabled' => 1,
+        'hyphenate_shy' => 1,
         'wrap_abbr' => 0,
         'wrap_caps' => 1,
         'wrap_initial_quotes' => 1,
@@ -61,6 +62,9 @@ function _typogrify_filter_tips($filter, $format, $long) {
       ) . '</li>';
     }
     $output .= t('<li>Converts multiple hyphens to en dashes and em dashes (according to your preferences), using SmartyPants.</li>');
+    if ($filter->settings['hyphenate_shy']) {
+      $output .= '<li>' . t('Words may be broken at the hyphenation points marked by “=”.') . '</li>';
+    }
     if ($filter->settings['wrap_abbr']) {
       $output .= '<li>' . t('Wraps abbreviations as “e.g.” to !span and adds a thin space (1/6 em) after the dots.</li>', array('!span' => '<code>&lt;span class="abbr"&gt;e.g.&lt;/span&gt;</code>')) . '</li>';
     }
@@ -161,6 +165,11 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
     $text = Typogrify::initial_quotes($text);
   }
 
+  // Wrap initial quotes.
+  if ($filter->settings['hyphenate_shy']) {
+    $text = typogrify_hyphenate($text);
+  }
+
   // Build a list of ligatures to convert.
   foreach (unicode_conversion_map('ligature') as $ascii => $unicode) {
     if ($filter->settings['ligatures'][$ascii]) {
@@ -221,6 +230,7 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     'wrap_abbr' => 0,
     'wrap_caps' => 1,
     'wrap_initial_quotes' => 1,
+    'hyphenate_shy' => 0,
     'wrap_numbers' => 0,
     'ligatures' => array(),
     'arrows' => array(),
@@ -269,6 +279,14 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     '#type' => 'checkbox',
     '#title' => t('Remove widows'),
     '#default_value' => $filter->settings['widont_enabled'],
+  );
+
+  // Remove widows settings.
+  $form['hyphenate_shy'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace <code>=</code> with <code>&amp;shy;</code>'),
+    '#description' => t('Words may be broken at the hyphenation points marked by “=”.'),
+    '#default_value' => $filter->settings['hyphenate_shy'],
   );
 
   // Wrap caps settings.

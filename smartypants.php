@@ -21,7 +21,7 @@ define('SMARTYPANTS_PHP_VERSION', '1.5.1e');
 // Fri 12 Mar 2004
 define('SMARTYPANTS_SYNTAX_VERSION', '1.5.1');
 // Regex-pattern for tags we don't mess with.
-define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|math)[\s>]@');
+define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|textarea|tt|math)[\s>]@');
 
 // A global variable to keep track of our current SmartyPants
 // configuration setting.
@@ -484,6 +484,33 @@ function SmartEllipses($text, $attr = NULL, $ctx = NULL) {
       if (!$in_pre) {
         $t = ProcessEscapes($t);
         $t = EducateEllipses($t);
+      }
+      $result .= $t;
+    }
+  }
+  return $result;
+}
+
+function typogrify_hyphenate($text, $attr = 0, $ctx = NULL) {
+  $tokens;
+  $tokens = _TokenizeHTML($text);
+
+  $result = '';
+  // Keep track of when we're inside <pre> or <code> tags.
+  $in_pre = 0;
+  foreach ($tokens as $cur_token) {
+    if ($cur_token[0] == "tag") {
+      // Don't mess with quotes inside tags.
+      $result .= $cur_token[1];
+      if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
+        $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      }
+    }
+    else {
+      $t = $cur_token[1];
+      if (!$in_pre) {
+        $number_finder = '/(\w)=(\w)/';
+        $t = preg_replace($number_finder, '\1&shy;\2' , $t);
       }
       $result .= $t;
     }
