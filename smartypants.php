@@ -535,17 +535,22 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
   $result = '';
   // Keep track of when we're inside <pre> or <code> tags.
   $in_pre = 0;
+  $span_stop = 0;
   foreach ($tokens as $cur_token) {
     if ($cur_token[0] == "tag") {
       // Don't mess with quotes inside tags.
       $result .= $cur_token[1];
       if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
         $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      } elseif (preg_match('/<span .*class="[^"]*\b(number|phone|ignore)\b[^"]*"/', $cur_token[1], $matches)) {
+          $span_stop = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      } elseif ($cur_token[1] == '</span>') {
+          $span_stop = 0;
       }
     }
     else {
       $t = $cur_token[1];
-      if (!$in_pre) {
+      if (!$in_pre && !$span_stop) {
         $number_finder = '@(?:(&#\d{3,4};)|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
         $t = preg_replace_callback($number_finder, $method , $t);
       }
