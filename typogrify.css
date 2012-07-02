@@ -10,6 +10,10 @@
   white-space: nowrap;
 }
 
+.number {
+  white-space: nowrap;
+}
+
 /* Only use the fancy ampersand in <h#> tags */
 h1 .amp,
 h2 .amp,
