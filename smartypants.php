@@ -575,7 +575,7 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       if (!$in_pre && !$span_stop) {
-        $number_finder = '@(?:(&#\d{3,4};)|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
+        $number_finder = '@(?:(&#\d{3,4};)|(\d{4}-\d\d-\d\d)|(\d\d\.\d\d\.\d{4})|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
         $t = preg_replace_callback($number_finder, $method, $t);
       }
       $result .= $t;
@@ -601,7 +601,15 @@ function _typogrify_number_replacer($hit, $thbl) {
     // Don't format german phone-numbers.
     return $hit[2];
   }
-  $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[3]);
+  elseif ($hit[3] != '') {
+    // Date -`iso don't touch.
+    return $hit[3];
+  }
+  elseif ($hit[4] != '') {
+    // Date -`dd.mm.yyyy don't touch.
+    return $hit[4];
+  }
+  $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[5]);
   $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[4]);
   return '<span class="number">' . $dec . $frac . '</span>';
 }
