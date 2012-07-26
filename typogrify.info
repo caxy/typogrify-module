@@ -3,3 +3,4 @@ description = Adds typographic refinements.
 package = "Input filters"
 core = 7.x
 files[] = typogrify.class.php
+files[] = tests/typogrify-smartypants.test
