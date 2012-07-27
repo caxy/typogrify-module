@@ -171,21 +171,21 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
 
   // Build a list of ligatures to convert.
   foreach (unicode_conversion_map('ligature') as $ascii => $unicode) {
-    if ($filter->settings['ligatures'][$ascii]) {
+    if (isset($filter->settings['ligatures'][$ascii]) && $filter->settings['ligatures'][$ascii]) {
       $characters_to_convert[] = $ascii;
     }
   }
 
   // Build a list of arrows to convert.
   foreach (unicode_conversion_map('arrow') as $ascii => $unicode) {
-    if ($filter->settings['arrows'][$ascii]) {
+    if (isset($filter->settings['arrow'][$ascii]) && $filter->settings['arrow'][$ascii]) {
       $characters_to_convert[] = $ascii;
     }
   }
 
   // Build a list of quotation marks to convert.
   foreach (unicode_conversion_map('quotes') as $ascii => $unicode) {
-    if ($filter->settings['quotes'][$ascii]) {
+    if (isset($filter->settings['quotes'][$ascii]) && $filter->settings['quotes'][$ascii]) {
       $characters_to_convert[] = $ascii;
     }
   }
