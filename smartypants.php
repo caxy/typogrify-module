@@ -610,7 +610,7 @@ function _typogrify_number_replacer($hit, $thbl) {
     return $hit[4];
   }
   $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[5]);
-  $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[4]);
+  $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[6]);
   return '<span class="number">' . $dec . $frac . '</span>';
 }
 
