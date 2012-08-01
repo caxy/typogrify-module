@@ -49,12 +49,41 @@ function smarty_modifier_smartypants($text, $attr = NULL) {
  * returns a locale-specific array of quotes.
  */
 function typogrify_i18n_quotes($langcode = NULL) {
+  // Ignore all english-equivalents served by fallback.
   $quotes = array(
-    'de' => array('do' => '&#8222;', 'dc' => '&#8220;', 'so' => '&#8218;', 'sc' => '&#8216;'),
-    'en' => array('do' => '&#8220;', 'dc' => '&#8221;', 'so' => '&#8216;', 'sc' => '&#8217;'),
-    'fr' => array('do' => '&laquo;', 'dc' => '&raquo;', 'so' => '&lsaquo;','sc' => '&rsaquo;'),
-    'nl' => array('do' => '&#8222;', 'dc' => '&#8220;', 'so' => '&#8216;', 'sc' => '&#8217;'),
-    'ru' => array('do' => '&laquo;', 'dc' => '&raquo;', 'so' => '&#8222;', 'sc' => '&#8220;'),
+    'ar' => array('«', '»', '‹', '›'), // Arabic
+    'be' => array('«', '»', '„', '“'), // Belarusian
+    'bg' => array('„', '“', '‚', '‘'), // Bulgarian
+    'da' => array('»', '«', '›', '‹'), // Danish
+    'de' => array('„', '“', '‚', '‘'), // German
+    'el' => array('«', '»', '‹', '›'), // Greek
+    'en' => array('“', '”', '‘', '’'), // English
+    'eo' => array('“', '”', '“', '”'), // Esperanto
+    'es' => array('«', '»', '“', '“'), // Spanish
+    'et' => array('„', '“', '„', '“'), // Estonian
+    'fi' => array('”', '”', '’', '’'), // Finnish
+    'fr' => array('«', '»', '‹', '›'), // French
+    'gsw-berne' => array('„', '“', '‚', '‘'), // Swiss German
+    'he' => array('“', '“', '«', '»'), // Hebrew
+    'hr' => array('»', '«', '›', '‹'), // Croatian
+    'hu' => array('„', '“', '„', '“'), // Hungarian
+    'is' => array('„', '“', '‚', '‘'), // Icelandic
+    'it' => array('«', '»', '‘', '’'), // Italian
+    'lt' => array('„', '“', '‚', '‘'), // Lithuanian
+    'lv' => array('„', '“', '„', '“'), // Latvian
+    'nl' => array('„', '“', '‘', '’'), // Dutch
+    'no' => array('„', '“', '„', '“'), // Norwegian
+    'pl' => array('„', '“', '«', '»'), // Polish
+    'pt' => array('“', '”', '‘', '’'), // Portuguese
+    'ro' => array('„', '“', '«', '»'), // Romanian
+    'ru' => array('«', '»', '„', '“'), // Russian
+    'sk' => array('„', '“', '‚', '‘'), // Slovak
+    'sl' => array('„', '“', '‚', '‘'), // Slovenian
+    'sq' => array('«', '»', '‹', '›'), // Albanian
+    'sr' => array('„', '“', '‚', '‘'), // Serbian
+    'sv' => array('”', '”', '’', '’'), // Swedish
+    'tr' => array('«', '»', '‹', '›'), // Turkish
+    'uk' => array('«', '»', '„', '“'), // Ukrainian.
   );
   if ($langcode == 'all') {
     return $quotes;
@@ -240,19 +269,19 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
           if ($t == "'") {
             // Special case: single-character ' token.
             if (preg_match('/\S/', $prev_token_last_char)) {
-              $t = $quotes['sc'];
+              $t = $quotes[3];
             }
             else {
-              $t = $quotes['so'];
+              $t = $quotes[2];
             }
           }
           elseif ($t == '"') {
             // Special case: single-character " token.
             if (preg_match('/\S/', $prev_token_last_char)) {
-              $t = $quotes['dc'];
+              $t = $quotes[1];
             }
             else {
-              $t = $quotes['do'];
+              $t = $quotes[0];
             }
           }
           else {
@@ -772,7 +801,7 @@ function SmartAmpersand($text) {
 /**
  * EducatedQuotes.
  * Example input:  "Isn't this fun?"
- * Example output: ['do']Isn&#8217;t this fun?['dc'];
+ * Example output: [0]Isn&#8217;t this fun?[1];
  *
  * @param string $_
  *   Input text.
@@ -790,7 +819,7 @@ function EducateQuotes($_, $quotes) {
   // Close the quotes by brute force:
   $_ = preg_replace(
     array("/^'(?=$punct_class\\B)/", "/^\"(?=$punct_class\\B)/"),
-    array($quotes['sc'], $quotes['dc']), $_);
+    array($quotes[3], $quotes[1]), $_);
 
 
   // Special case for double sets of quotes, e.g.:
@@ -804,10 +833,10 @@ function EducateQuotes($_, $quotes) {
       "/(\w)'\"/",
     ),
     array(
-      $quotes['do'] . $spacer . $quotes['so'],
-      $quotes['so'] . $spacer . $quotes['do'],
-      '\1' . $quotes['dc'] . $spacer . $quotes['sc'],
-      '\1' . $quotes['sc'] . $spacer . $quotes['dc'],
+      $quotes[0] . $spacer . $quotes[2],
+      $quotes[2] . $spacer . $quotes[0],
+      '\1' . $quotes[1] . $spacer . $quotes[3],
+      '\1' . $quotes[3] . $spacer . $quotes[1],
     ), $_);
 
   // Special case for decade abbreviations (the '80s):
@@ -831,7 +860,7 @@ function EducateQuotes($_, $quotes) {
     )
     '                 # the quote
     (?=\\w)           # followed by a word character
-    }x", '\1' . $quotes['so'], $_);
+    }x", '\1' . $quotes[2], $_);
   // Single closing quotes:
   $_ = preg_replace("{
     ($close_class)?
@@ -841,10 +870,10 @@ function EducateQuotes($_, $quotes) {
     )                 # char or an 's' at a word ending position. This
                       # is a special case to handle something like:
                       # \"<i>Custer</i>'s Last Stand.\"
-    }xi", '\1' . $quotes['sc'], $_);
+    }xi", '\1' . $quotes[3], $_);
 
   // Any remaining single quotes should be opening ones:
-  $_ = str_replace("'", $quotes['so'], $_);
+  $_ = str_replace("'", $quotes[2], $_);
 
 
   // Get most opening double quotes:
@@ -859,7 +888,7 @@ function EducateQuotes($_, $quotes) {
     )
     \"                # the quote
     (?=\\w)           # followed by a word character
-    }x", '\1' . $quotes['do'], $_);
+    }x", '\1' . $quotes[0], $_);
 
   // Double closing quotes:
   $_ = preg_replace("{
@@ -867,10 +896,10 @@ function EducateQuotes($_, $quotes) {
     \"
     (?(1)|(?=\\s))   # If $1 captured, then do nothing;
                      # if not, then make sure the next char is whitespace.
-    }x", '\1' . $quotes['dc'], $_);
+    }x", '\1' . $quotes[1], $_);
 
   // Any remaining quotes should be opening ones.
-  $_ = str_replace('"', $quotes['do'], $_);
+  $_ = str_replace('"', $quotes[0], $_);
 
   return $_;
 }
