@@ -46,7 +46,7 @@ function smarty_modifier_smartypants($text, $attr = NULL) {
 }
 
 /**
- * returns a locale-specific array of qoutes.
+ * returns a locale-specific array of quotes.
  */
 function typogrify_i18n_quotes($langcode = NULL) {
   $quotes = array(
@@ -240,19 +240,19 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
           if ($t == "'") {
             // Special case: single-character ' token.
             if (preg_match('/\S/', $prev_token_last_char)) {
-              $t = $quote['sc'];
+              $t = $quotes['sc'];
             }
             else {
-              $t = $quote['so'];
+              $t = $quotes['so'];
             }
           }
           elseif ($t == '"') {
             // Special case: single-character " token.
             if (preg_match('/\S/', $prev_token_last_char)) {
-              $t = $quote['dc'];
+              $t = $quotes['dc'];
             }
             else {
-              $t = $quote['do'];
+              $t = $quotes['do'];
             }
           }
           else {
