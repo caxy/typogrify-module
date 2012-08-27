@@ -178,7 +178,7 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
 
   // Build a list of arrows to convert.
   foreach (unicode_conversion_map('arrow') as $ascii => $unicode) {
-    if (isset($filter->settings['arrow'][$ascii]) && $filter->settings['arrow'][$ascii]) {
+    if (isset($filter->settings['arrows'][$ascii]) && $filter->settings['arrows'][$ascii]) {
       $characters_to_convert[] = $ascii;
     }
   }
