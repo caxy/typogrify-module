@@ -604,7 +604,7 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       if (!$in_pre && !$span_stop) {
-        $number_finder = '@(?:(&#\d{3,4};)|(\d{4}-\d\d-\d\d)|(\d\d\.\d\d\.\d{4})|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
+        $number_finder = '@(?:(&#\d{2,4};|&#x[0-9a-fA-F]{2,4};)|(\d{4}-\d\d-\d\d)|(\d\d\.\d\d\.\d{4})|(0[ \d-/]+)|([+-]?\d+)([.,]\d+|))@';
         $t = preg_replace_callback($number_finder, $method, $t);
       }
       $result .= $t;
