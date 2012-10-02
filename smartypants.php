@@ -533,7 +533,7 @@ function typogrify_hyphenate($text) {
   $tokens;
   $tokens = _TokenizeHTML($text);
 
-  $number_finder = "/(" . I18N_LETTER . ')=(' . I18N_LETTER . ')/';
+  $equal_finder = "/(" . I18N_LETTER . ')=(' . I18N_LETTER . ')/u';
   $result = '';
   // Keep track of when we're inside <pre> or <code> tags.
   $in_pre = 0;
@@ -548,7 +548,7 @@ function typogrify_hyphenate($text) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $t = preg_replace($number_finder, '\1&shy;\2', $t);
+        $t = preg_replace($equal_finder, '\1&shy;\2', $t);
       }
       $result .= $t;
     }
@@ -719,7 +719,7 @@ function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
       $t = $cur_token[1];
       if (!$in_pre) {
         $abbr_finder = '/(?<=\s|)(' . I18N_LETTER . '+\.)('
-          . I18N_LETTER . '+\.)+(?=\s|)/';
+          . I18N_LETTER . '+\.)+(?=\s|)/u';
         $t = preg_replace_callback($abbr_finder, $replace_method, $t);
       }
       $result .= $t;
