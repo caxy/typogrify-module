@@ -372,7 +372,7 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
   );
 
 
-  // fraction conversion settings.
+  // Fraction conversion settings.
   $fraction_options = array();
   foreach (unicode_conversion_map('fraction') as $ascii => $unicode) {
     $fraction_options[$ascii] = t('Convert <code>@ascii</code> to !unicode', array(
