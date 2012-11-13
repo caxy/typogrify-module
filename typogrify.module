@@ -137,6 +137,11 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
     }
   }
 
+  // Wrap caps.
+  if ($filter->settings['wrap_caps']) {
+    $text = Typogrify::caps($text);
+  }
+
   // Build a list of arrows to convert.
   foreach (unicode_conversion_map('arrow') as $ascii => $unicode) {
     if (isset($filter->settings['arrows'][$ascii]) && $filter->settings['arrows'][$ascii]) {
@@ -181,11 +186,6 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
   // Wrap huge numbers.
   if ($filter->settings['wrap_numbers'] > 0) {
     $text = typogrify_smart_numbers($text, $filter->settings['wrap_numbers']);
-  }
-
-  // Wrap caps.
-  if ($filter->settings['wrap_caps']) {
-    $text = Typogrify::caps($text);
   }
 
   // Wrap initial quotes.
