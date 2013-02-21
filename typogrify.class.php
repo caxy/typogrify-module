@@ -74,8 +74,9 @@ class Typogrify {
 
     $cap_finder = "/(
             (\b[A-Z=\d]*       # Group 2: Any amount of caps and digits
-            [A-Z]\d*[A-Z]      # A cap string much at least include two caps (but they can have digits between them)
-            [A-Z'\d]*\b)       # Any amount of caps and digits
+            [A-Z][A-Z\d]*      # A cap string much at least include two caps (but they can have digits between them)
+            (?:&amp;)?         # allowing ampersand in caps.
+            [A-Z'\d]*[A-Z])    # Any amount of caps and digits
             | (\b[A-Z]+\.\s?   # OR: Group 3: Some caps, followed by a '.' and an optional space
             (?:[A-Z]+\.\s?)+)  # Followed by the same thing at least once more
             (?:\s|\b|$))/x";
