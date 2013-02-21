@@ -23,9 +23,6 @@ define('SMARTYPANTS_SYNTAX_VERSION', '1.5.1');
 // Regex-pattern for tags we don't mess with.
 define('SMARTYPANTS_TAGS_TO_SKIP', '@<(/?)(?:pre|code|kbd|script|textarea|tt|math)[\s>]@');
 
-// Alphabeth + C0h - FFh.
-define('I18N_LETTER', '[A-Za-zÀ-ÿ]');
-
 // A global variable to keep track of our current SmartyPants
 // configuration setting.
 //
@@ -231,7 +228,7 @@ function SmartyPants($text, $attr = NULL, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       // Remember last char of this token before processing.
-      $last_char = substr($t, -1);
+      $last_char = mb_substr($t, -1);
       if (!$in_pre) {
         $quotes = typogrify_i18n_quotes(isset($span_lang) ? $span_lang : $doc_lang);
 
@@ -368,7 +365,7 @@ function SmartQuotes($text, $attr = NULL, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       // Remember last char of this token before processing.
-      $last_char = substr($t, -1);
+      $last_char = mb_substr($t, -1);
       if (!$in_pre) {
         $t = ProcessEscapes($t);
         if ($do_backticks) {
@@ -533,7 +530,7 @@ function typogrify_hyphenate($text) {
   $tokens;
   $tokens = _TokenizeHTML($text);
 
-  $equal_finder = "/(" . I18N_LETTER . ')=(' . I18N_LETTER . ')/u';
+  $equal_finder = '/(\p{L})=(\p{L})/u';
   $result = '';
   // Keep track of when we're inside <pre> or <code> tags.
   $in_pre = 0;
@@ -718,8 +715,7 @@ function typogrify_smart_abbreviation($text, $attr = 0, $ctx = NULL) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $abbr_finder = '/(?<=\s|)(' . I18N_LETTER . '+\.)('
-          . I18N_LETTER . '+\.)+(?=\s|)/u';
+        $abbr_finder = '/(?<=\s|)(\p{L}+\.)(\p{L}+\.)+(?=\s|)/u';
         $t = preg_replace_callback($abbr_finder, $replace_method, $t);
       }
       $result .= $t;
@@ -745,7 +741,7 @@ function _typogrify_abbr_asis($hit) {
  *   matcher-array from preg_replace_callback.
  */
 function _typogrify_abbr_thinsp($hit) {
-  $res = preg_replace('/\.(' . I18N_LETTER . ')/', '.&#8201;\1', $hit[0]);
+  $res = preg_replace('/\.(\p{L})/', '.&#8201;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
@@ -756,7 +752,7 @@ function _typogrify_abbr_thinsp($hit) {
  *   matcher-array from preg_replace_callback.
  */
 function _typogrify_abbr_narrownbsp($hit) {
-  $res = preg_replace('/\.(' . I18N_LETTER . ')/', '.&#8239;\1', $hit[0]);
+  $res = preg_replace('/\.(\p{L})/', '.&#8239;\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
@@ -768,7 +764,7 @@ function _typogrify_abbr_narrownbsp($hit) {
  */
 function _typogrify_abbr_span($hit) {
   $thbl = '.<span style="margin-left:0.167em"><span style="display:none">&nbsp;</span></span>';
-  $res = preg_replace('/\.(' . I18N_LETTER . ')/', $thbl . '\1', $hit[0]);
+  $res = preg_replace('/\.(\p{L})/', $thbl . '\1', $hit[0]);
   return '<span class="abbr">' . $res . '</span>';
 }
 
@@ -833,10 +829,10 @@ function EducateQuotes($_, $quotes) {
   $spacer = '&#8201;';
   $_ = preg_replace(
     array(
-      "/\"'(?=\w)/",
-      "/'\"(?=\w)/",
-      "/(\w)\"'/",
-      "/(\w)'\"/",
+      "/\"'(?=\p{L})/",
+      "/'\"(?=\p{L})/",
+      "/(\p{L})\"'/",
+      "/(\p{L})'\"/",
     ),
     array(
       $quotes[0] . $spacer . $quotes[2],
@@ -849,7 +845,7 @@ function EducateQuotes($_, $quotes) {
   $_ = preg_replace("/'(?=\\d{2}s)/", '&#8217;', $_);
 
   // Special case for apostroph.
-  $_ = preg_replace("/(\\w)(')(?=\\w)/", '\1&#8217;', $_);
+  $_ = preg_replace("/(\\p{L})(')(?=\\p{L})/", '\1&#8217;', $_);
 
   $close_class = '[^\ \t\r\n\[\{\(\-]';
   $dec_dashes = '&\#8211;|&\#8212;';
@@ -865,7 +861,7 @@ function EducateQuotes($_, $quotes) {
       &\\#x201[34];   # or hex
     )
     '                 # the quote
-    (?=\\w)           # followed by a word character
+    (?=\\p{L})           # followed by a word character
     }x", '\1' . $quotes[2], $_);
   // Single closing quotes:
   $_ = preg_replace("{
@@ -893,7 +889,7 @@ function EducateQuotes($_, $quotes) {
       &\\#x201[34];   # or hex
     )
     \"                # the quote
-    (?=\\w)           # followed by a word character
+    (?=\\p{L})           # followed by a word character
     }x", '\1' . $quotes[0], $_);
 
   // Double closing quotes:
