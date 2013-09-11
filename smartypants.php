@@ -845,7 +845,7 @@ function EducateQuotes($_, $quotes) {
   $_ = preg_replace("/'(?=\\d{2}s)/", '&#8217;', $_);
 
   // Special case for apostroph.
-  $_ = preg_replace("/(\\p{L})(')(?=\\p{L})/", '\1&#8217;', $_);
+  $_ = preg_replace("/(\\p{L})(')(?=\\p{L}|$)/", '\1&#8217;', $_);
 
   $close_class = '[^\ \t\r\n\[\{\(\-]';
   $dec_dashes = '&\#8211;|&\#8212;';
