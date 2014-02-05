@@ -24,6 +24,7 @@ function typogrify_filter_info() {
         'smartypants_hyphens' => 3,
         'wrap_ampersand' => 1,
         'widont_enabled' => 1,
+        'space_to_nbsp' => 1,
         'hyphenate_shy' => 0,
         'wrap_abbr' => 0,
         'wrap_caps' => 1,
