@@ -1123,6 +1123,36 @@ function typogrify_space_to_nbsp($text) {
   return $result;
 }
 
+/**
+ * space_hyphens
+ *
+ * Replaces a normal dash with em-dash between whitespaces.
+ */
+function typogrify_space_hyphens($text) {
+  $tokens;
+  $tokens = _TokenizeHTML($text);
+
+  $result = '';
+  // Keep track of when we're inside <pre> or <code> tags.
+  $in_pre = 0;
+  foreach ($tokens as $cur_token) {
+    if ($cur_token[0] == "tag") {
+      // Don't mess with quotes inside tags.
+      $result .= $cur_token[1];
+      if (preg_match(SMARTYPANTS_TAGS_TO_SKIP, $cur_token[1], $matches)) {
+        $in_pre = isset($matches[1]) && $matches[1] == '/' ? 0 : 1;
+      }
+    }
+    else {
+      $t = $cur_token[1];
+      if (!$in_pre) {
+        $t = preg_replace("/\s(-{1,3})\s/", '&nbsp;— ', $t);
+      }
+      $result .= $t;
+    }
+  }
+  return $result;
+}
 
 
 // _TokenizeHTML is shared between PHP SmartyPants and PHP Markdown.

@@ -22,6 +22,7 @@ function typogrify_filter_info() {
       'default settings' => array(
         'smartypants_enabled' => 1,
         'smartypants_hyphens' => 3,
+        'space_hyphens' => 0,
         'wrap_ampersand' => 1,
         'widont_enabled' => 1,
         'space_to_nbsp' => 1,
@@ -220,6 +221,11 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
     $text = typogrify_space_to_nbsp($text);
   }
 
+  // Replace normal whitespace '-' whitespace with em-dash.
+  if (isset($filter->settings['space_hyphens']) && $filter->settings['space_hyphens']) {
+    $text = typogrify_space_hyphens($text);
+  }
+
   return $text;
 }
 
@@ -249,6 +255,7 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
   $filter->settings += array(
     'smartypants_enabled' => 1,
     'smartypants_hyphens' => 2,
+    'space_hyphens' => 0,
     'wrap_ampersand' => 1,
     'widont_enabled' => 1,
     'space_to_nbsp' => 1,
@@ -291,6 +298,14 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
       3 => t('“--” for em-dashes; “---” for en-dashes'),
       2 => t('“---” for em-dashes; “--” for en-dashes'),
     ),
+  );
+
+  // Replace space_hyphens with em-dash.
+  $form['space_hyphens'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace stand-alone dashes (normal dashes between whitespace) em-dashes.'),
+    '#description' => t('" - " will turn into " — ".'),
+    '#default_value' => $filter->settings['space_hyphens'],
   );
 
   // Remove widows settings.
