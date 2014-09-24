@@ -579,6 +579,9 @@ function typogrify_smart_numbers($text, $attr = 0, $ctx = NULL) {
   elseif ($attr == 3) {
     $method = '_typogrify_number_span';
   }
+  elseif ($attr == 4) {
+    $method = '_typogrify_number_just_span';
+  }
 
   $result = '';
   // Keep track of when we're inside <pre> or <code> tags.
@@ -675,6 +678,16 @@ function _typogrify_number_thinsp($hit) {
 function _typogrify_number_span($hit) {
   $thbl = '<span style="margin-left:0.167em"></span>';
   return _typogrify_number_replacer($hit, $thbl);
+}
+
+/**
+ * Wrapping numbers and adding whitespace by setting margin-left in a span.
+ *
+ * @param array $hit
+ *   matcher-array from preg_replace_callback.
+ */
+function _typogrify_number_just_span($hit) {
+  return _typogrify_number_replacer($hit, '');
 }
 
 /**

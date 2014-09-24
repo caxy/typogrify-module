@@ -356,6 +356,7 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
       1 => t('“U+202F“ Narrow no-break space'),
       2 => t('“U+2009“ Thin space'),
       3 => t('span with margin-left: 0.167em'),
+      4 => t('just wrap numbers'),
     ),
   );
 
