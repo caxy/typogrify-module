@@ -1146,7 +1146,7 @@ function typogrify_space_hyphens($text) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $t = preg_replace("/\s(-{1,3})\s/", '&nbsp;— ', $t);
+        $t = preg_replace("/\s(-{1,3})\s/", '&#8239;—&thinsp;', $t);
       }
       $result .= $t;
     }
