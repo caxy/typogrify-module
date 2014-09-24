@@ -217,7 +217,7 @@ function _typogrify_process($text, $filter, $format, $langcode, $cache, $cache_i
   // Replace normal spaces with non-breaking spaces before "double punctuation
   // marks". This is especially useful in french.
   if (isset($filter->settings['space_to_nbsp']) && $filter->settings['space_to_nbsp']) {
-    $text = Typogrify::space_to_nbsp($text);
+    $text = typogrify_space_to_nbsp($text);
   }
 
   return $text;
