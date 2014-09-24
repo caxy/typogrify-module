@@ -293,13 +293,6 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     ),
   );
 
-  // Wrap ampersand settings.
-  $form['wrap_ampersand'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Wrap ampersands'),
-    '#default_value' => $filter->settings['wrap_ampersand'],
-  );
-
   // Remove widows settings.
   $form['widont_enabled'] = array(
     '#type' => 'checkbox',
@@ -315,11 +308,28 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     '#default_value' => $filter->settings['hyphenate_shy'],
   );
 
+  // Replace normal spaces with non-breaking spaces before "double punctuation
+  // marks". This is especially useful in french.
+  $form['space_to_nbsp'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace normal spaces with non-breaking spaces before "double punctuation marks" !marks.',
+      array('!marks' => '(<code>!?:;</code>)')),
+    '#description' => t('This is especially useful for french.'),
+    '#default_value' => $filter->settings['space_to_nbsp'],
+  );
+
   // Wrap caps settings.
   $form['wrap_caps'] = array(
     '#type' => 'checkbox',
     '#title' => t('Wrap caps'),
     '#default_value' => $filter->settings['wrap_caps'],
+  );
+
+  // Wrap ampersand settings.
+  $form['wrap_ampersand'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Wrap ampersands'),
+    '#default_value' => $filter->settings['wrap_ampersand'],
   );
 
   $form['wrap_abbr'] = array(
@@ -421,16 +431,6 @@ function _typogrify_settings($form, &$form_state, $filter, $format, $defaults, $
     '#title' => t('Quotes'),
     '#options' => $quotes_options,
     '#default_value' => $filter->settings['quotes'],
-  );
-
-  // Replace normal spaces with non-breaking spaces before "double punctuation
-  // marks". This is especially useful in french.
-  $form['space_to_nbsp'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Replace normal spaces with non-breaking spaces before "double punctuation marks" !marks.',
-      array('!marks' => '(<code>!?:;</code>)')),
-    '#description' => t('This is especially useful for french.'),
-    '#default_value' => $filter->settings['space_to_nbsp'],
   );
 
   // Version Information Settings.
