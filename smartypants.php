@@ -1115,7 +1115,7 @@ function typogrify_space_to_nbsp($text) {
     else {
       $t = $cur_token[1];
       if (!$in_pre) {
-        $t = preg_replace("/\s([\!\?\:;])/", '&nbsp;$2', $t);
+        $t = preg_replace("/\s([\!\?\:;])/", '&nbsp;$1', $t);
       }
       $result .= $t;
     }
