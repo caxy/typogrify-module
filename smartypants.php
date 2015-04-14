@@ -644,7 +644,11 @@ function _typogrify_number_replacer($hit, $thbl) {
     // Date -`dd.mm.yyyy don't touch.
     return $hit[5];
   }
-  $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[6]);
+  if (preg_match('/[+-]?\d{5,}/', $hit[6]) == 1) {
+    $dec = preg_replace('/[+-]?\d{1,3}(?=(\d{3})+(?!\d))/', '\0' . $thbl, $hit[6]);
+  } else {
+    $dec = $hit[6];
+  }
   $frac = preg_replace('/\d{3}/', '\0' . $thbl, $hit[7]);
   return '<span class="number">' . $dec . $frac . '</span>';
 }
