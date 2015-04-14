@@ -75,8 +75,8 @@ class Typogrify {
     $cap_finder = "/(
             (\b[[\p{Lu}=\d]*       # Group 2: Any amount of caps and digits
             [[\p{Lu}][[\p{Lu}\d]*  # A cap string much at least include two caps (but they can have digits between them)
-            (?:&amp;)?         # allowing ampersand in caps.
-            [[\p{Lu}'\d]*[[\p{Lu}]) # Any amount of caps and digits
+            (?:&amp;)?             # allowing ampersand in caps.
+            [[\p{Lu}'\d]*[[\p{Lu}\d]) # Any amount of caps and digits
             | (\b[[\p{Lu}]+\.\s?   # OR: Group 3: Some caps, followed by a '.' and an optional space
             (?:[[\p{Lu}]+\.\s?)+)  # Followed by the same thing at least once more
             (\s|\b|$|[)}\]>]))/xu";
@@ -158,7 +158,7 @@ class Typogrify {
    */
   public static function widont($text) {
     // This regex is a beast, tread lightly
-    $widont_finder = "/([^<>\s]+)                             # ensure more than 1 word
+    $widont_finder = "/([^<>\s]+|<\/span>)                    # ensure more than 1 word
                       (\s+)                                   # the space to replace
                       ([^<>\s]+                               # must be flollowed by non-tag non-space characters
                       \s*                                     # optional white space!
