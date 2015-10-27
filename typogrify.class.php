@@ -178,7 +178,7 @@ class Typogrify {
   public static function filter($text, $do_guillemets=FALSE) {
     $text = Typogrify::amp($text);
     $text = Typogrify::widont($text);
-    $text = SmartyPants($text);
+    $text = \Michelf\SmartyPants::defaultTransform($text);
     $text = Typogrify::caps($text);
     $text = Typogrify::initial_quotes($text, $do_guillemets);
     $text = Typogrify::dash($text);
