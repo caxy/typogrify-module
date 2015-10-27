@@ -89,20 +89,20 @@ class FilterTypogrify extends FilterBase {
 
     // Build a list of ligatures to convert.
     foreach (unicode_conversion_map('ligature') as $ascii => $unicode) {
-      if (isset($filter->settings['ligatures'][$ascii]) && $filter->settings['ligatures'][$ascii]) {
+      if (isset($this->settings['ligatures'][$ascii]) && $this->settings['ligatures'][$ascii]) {
         $characters_to_convert[] = $ascii;
       }
     }
 
     // Wrap caps.
-    if ($filter->settings['wrap_caps']) {
+    if ($this->settings['wrap_caps']) {
       $text = Typogrify::caps($text);
     }
 
     // Build a list of arrows to convert.
     foreach (unicode_conversion_map('arrow') as $ascii => $unicode) {
       $htmle = _typogrify_unquote($ascii);
-      if ((isset($filter->settings['arrows'][$ascii]) && $filter->settings['arrows'][$ascii]) ||
+      if ((isset($this->settings['arrows'][$ascii]) && $filter->settings['arrows'][$ascii]) ||
         (isset($filter->settings['arrows'][$htmle]) && $filter->settings['arrows'][$htmle])) {
         $characters_to_convert[] = $ascii;
       }
@@ -110,14 +110,14 @@ class FilterTypogrify extends FilterBase {
 
     // Build a list of fractions to convert.
     foreach (unicode_conversion_map('fraction') as $ascii => $unicode) {
-      if (isset($filter->settings['fractions'][$ascii]) && $filter->settings['fractions'][$ascii]) {
+      if (isset($this->settings['fractions'][$ascii]) && $this->settings['fractions'][$ascii]) {
         $characters_to_convert[] = $ascii;
       }
     }
 
     // Build a list of quotation marks to convert.
     foreach (unicode_conversion_map('quotes') as $ascii => $unicode) {
-      if (isset($filter->settings['quotes'][$ascii]) && $filter->settings['quotes'][$ascii]) {
+      if (isset($this->settings['quotes'][$ascii]) && $this->settings['quotes'][$ascii]) {
         $characters_to_convert[] = $ascii;
       }
     }
@@ -128,48 +128,48 @@ class FilterTypogrify extends FilterBase {
     }
 
     // Wrap ampersands.
-    if ($filter->settings['wrap_ampersand']) {
+    if ($this->settings['wrap_ampersand']) {
       $text = SmartAmpersand($text);
     }
 
     // Smartypants formatting.
-    if ($filter->settings['smartypants_enabled']) {
-      $text = SmartyPants($text, $filter->settings['smartypants_hyphens'], $ctx);
+    if ($this->settings['smartypants_enabled']) {
+      $text = SmartyPants($text, $this->settings['smartypants_hyphens'], $ctx);
     }
 
     // Wrap abbreviations.
-    if ($filter->settings['wrap_abbr'] > 0) {
-      $text = typogrify_smart_abbreviation($text, $filter->settings['wrap_abbr']);
+    if ($this->settings['wrap_abbr'] > 0) {
+      $text = typogrify_smart_abbreviation($text, $this->settings['wrap_abbr']);
     }
 
     // Wrap huge numbers.
-    if ($filter->settings['wrap_numbers'] > 0) {
-      $text = typogrify_smart_numbers($text, $filter->settings['wrap_numbers']);
+    if ($this->settings['wrap_numbers'] > 0) {
+      $text = typogrify_smart_numbers($text, $this->settings['wrap_numbers']);
     }
 
     // Wrap initial quotes.
-    if ($filter->settings['wrap_initial_quotes']) {
+    if ($this->settings['wrap_initial_quotes']) {
       $text = Typogrify::initial_quotes($text);
     }
 
     // Wrap initial quotes.
-    if ($filter->settings['hyphenate_shy']) {
+    if ($this->settings['hyphenate_shy']) {
       $text = typogrify_hyphenate($text);
     }
 
     // Remove widows.
-    if ($filter->settings['widont_enabled']) {
+    if ($this->settings['widont_enabled']) {
       $text = Typogrify::widont($text);
     }
 
     // Replace normal spaces with non-breaking spaces before "double punctuation
     // marks". This is especially useful in french.
-    if (isset($filter->settings['space_to_nbsp']) && $filter->settings['space_to_nbsp']) {
+    if (isset($this->settings['space_to_nbsp']) && $this->settings['space_to_nbsp']) {
       $text = typogrify_space_to_nbsp($text);
     }
 
     // Replace normal whitespace '-' whitespace with em-dash.
-    if (isset($filter->settings['space_hyphens']) && $filter->settings['space_hyphens']) {
+    if (isset($this->settings['space_hyphens']) && $this->settings['space_hyphens']) {
       $text = typogrify_space_hyphens($text);
     }
 
