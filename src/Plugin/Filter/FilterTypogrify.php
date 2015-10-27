@@ -9,7 +9,7 @@ namespace Drupal\typogrify\Plugin\Filter;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\filter\Plugin\FilterBase;
-use michelf\SmartyPants;
+use Michelf\SmartyPants;
 
 /**
  * Provides a filter to limit allowed HTML tags.
